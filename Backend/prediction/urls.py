@@ -1,8 +1,6 @@
 from django.urls import path
-from.views import predictAPIView
+from .views import PredictAPIView
 
 urlpatterns = [
-    
-    path("predict/", predictAPIView.as_view(), name="predict"),
-
+    path("predict/", PredictAPIView.as_view(), name="predict"),
 ]

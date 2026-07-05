@@ -9,10 +9,23 @@ from rest_framework.response import Response
 # HTTP status codes (200, 400, 404, 500...) ko readable banane ke liye.
 from rest_framework import status
 
+from prediction.services import predict_disease
+from prediction.utils import image_to_numpy
+
 # Serializer client se aaye hue data ko validate karega.
 # Jaise image aayi ya nahi, image valid hai ya nahi.
 from .serializers import PredictSerializer
 
+
+class HealthCheckView(APIView):
+    def get(self, request):
+        return Response(
+            {
+                "success": True,
+                "message": "KrishiSahay Backend Running"
+            },
+            status=status.HTTP_200_OK
+        )
 
 class PredictAPIView(APIView):
     """
@@ -32,6 +45,7 @@ class PredictAPIView(APIView):
 
         # Agar data valid nahi hai to error return kar do.
         if not serializer.is_valid():
+            print(serializer.errors)
             return Response(
                 serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST
@@ -41,15 +55,15 @@ class PredictAPIView(APIView):
         # Ab request.data ki jagah validated_data use karna best practice hai.
         image = serializer.validated_data["image"]
 
-        # Yahan future me TensorFlow MobileNetV2 model ko image bhejenge.
-        # prediction = predict_disease(image)
+        image_array = image_to_numpy(image)
+        
+        prediction = predict_disease(image_array)
 
         # Abhi sirf testing ke liye success response bhej rahe hain.
         return Response(
             {
                 "success": True,
-                "message": "Prediction successful",
-                "data":{},
+                "prediction": prediction, 
             },
             status=status.HTTP_200_OK
         )

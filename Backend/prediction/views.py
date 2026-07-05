@@ -1,20 +1,10 @@
-# APIView ek class-based view hai jo Django REST Framework me REST API banane ke liye use hoti hai.
-# Isme hum GET, POST, PUT, DELETE jaise HTTP methods define kar sakte hain.
 from rest_framework.views import APIView
-
-# Response JSON response bhejne ke liye use hota hai.
-# Ye Python dictionary ko automatically JSON me convert kar deta hai.
 from rest_framework.response import Response
-
-# HTTP status codes (200, 400, 404, 500...) ko readable banane ke liye.
 from rest_framework import status
 
+from .serializers import PredictSerializer
 from prediction.services import predict_disease
 from prediction.utils import image_to_numpy
-
-# Serializer client se aaye hue data ko validate karega.
-# Jaise image aayi ya nahi, image valid hai ya nahi.
-from .serializers import PredictSerializer
 
 
 class HealthCheckView(APIView):
@@ -27,43 +17,36 @@ class HealthCheckView(APIView):
             status=status.HTTP_200_OK
         )
 
+
 class PredictAPIView(APIView):
     """
     Plant disease prediction API.
-    Ye API React Native se image receive karegi aur
-    future me ML model se prediction return karegi.
+    Receives an image and returns the AI prediction.
     """
 
-    # React Native image ko POST request ke through bhejega.
-    # request object ke andar client ka sara data hota hai.
-    # request.data me JSON, Form Data, Image, File etc. aa sakta hai.
     def post(self, request):
 
-        # Client se aaye hue data ko serializer ke paas bhej rahe hain.
-        # Serializer request data ko validate karega.
         serializer = PredictSerializer(data=request.data)
 
-        # Agar data valid nahi hai to error return kar do.
         if not serializer.is_valid():
-            print(serializer.errors)
             return Response(
                 serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Validation ke baad safe data validated_data me milta hai.
-        # Ab request.data ki jagah validated_data use karna best practice hai.
+        # Uploaded image
         image = serializer.validated_data["image"]
 
+        # Convert to numpy array
         image_array = image_to_numpy(image)
-        
+
+        # AI prediction
         prediction = predict_disease(image_array)
 
-        # Abhi sirf testing ke liye success response bhej rahe hain.
         return Response(
             {
                 "success": True,
-                "prediction": prediction, 
+                "prediction": prediction
             },
             status=status.HTTP_200_OK
         )

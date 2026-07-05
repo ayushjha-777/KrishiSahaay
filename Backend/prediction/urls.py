@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import PredictAPIView, HealthCheckView
+from .views import HealthCheckView, PredictAPIView
 
 urlpatterns = [
     path("", HealthCheckView.as_view(), name="health"),

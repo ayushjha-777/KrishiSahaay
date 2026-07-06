@@ -1,3 +1,18 @@
+
+class PredictAPIView(APIView):
+
+    # React Native image ko POST request ke through bhejega.
+    # request object ke andar client ka sara data hota hai.
+    # request.data me JSON, Form Data, Image, File etc. aa sakta hai.
+    def post(self, request):
+
+        # Client se aaye hue data ko serializer ke paas bhej rahe hain.
+        # Serializer request data ko validate karega.
+        serializer = PredictSerializer(data=request.data)
+
+        # Agar data valid nahi hai to error return kar do.
+        if not serializer.is_valid():
+            print(serializer.errors)
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status

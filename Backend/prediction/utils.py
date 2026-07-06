@@ -26,3 +26,4 @@ def image_to_numpy(uploaded_file):
     # It is already inside the trained model.
 
     return img_array
+

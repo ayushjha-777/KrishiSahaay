@@ -1,9 +1,5 @@
+
 class PredictAPIView(APIView):
-    """
-    Plant disease prediction API.
-    Ye API React Native se image receive karegi aur
-    future me ML model se prediction return karegi.
-    """
 
     # React Native image ko POST request ke through bhejega.
     # request object ke andar client ka sara data hota hai.
@@ -17,24 +13,55 @@ class PredictAPIView(APIView):
         # Agar data valid nahi hai to error return kar do.
         if not serializer.is_valid():
             print(serializer.errors)
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+from .serializers import PredictSerializer
+from prediction.services import predict_disease
+from prediction.utils import image_to_numpy
+
+
+class HealthCheckView(APIView):
+    def get(self, request):
+        return Response(
+            {
+                "success": True,
+                "message": "KrishiSahay Backend Running"
+            },
+            status=status.HTTP_200_OK
+        )
+
+
+class PredictAPIView(APIView):
+    """
+    Plant disease prediction API.
+    Receives an image and returns the AI prediction.
+    """
+
+    def post(self, request):
+
+        serializer = PredictSerializer(data=request.data)
+
+        if not serializer.is_valid():
             return Response(
                 serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Validation ke baad safe data validated_data me milta hai.
-        # Ab request.data ki jagah validated_data use karna best practice hai.
+        # Uploaded image
         image = serializer.validated_data["image"]
 
+        # Convert to numpy array
         image_array = image_to_numpy(image)
-        
+
+        # AI prediction
         prediction = predict_disease(image_array)
 
-        # Abhi sirf testing ke liye success response bhej rahe hain.
         return Response(
             {
                 "success": True,
-                "prediction": prediction, 
+                "prediction": prediction
             },
             status=status.HTTP_200_OK
         )

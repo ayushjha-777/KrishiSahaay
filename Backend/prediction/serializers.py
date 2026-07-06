@@ -1,4 +1,5 @@
-from rest_framework import serializers
+
+from rest_framework import serializer
 
 class ImageUploadSerializer(serializers.Serializer):
     image = serializers.ImageField()
@@ -23,3 +24,10 @@ class ImageUploadSerializer(serializers.Serializer):
 
         return image
 
+
+class PredictSerializer(serializers.Serializer):
+    image = serializers.ImageField(
+        required=True,
+        allow_empty_file=False,
+        use_url=False,
+    )

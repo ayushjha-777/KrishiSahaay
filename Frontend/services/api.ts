@@ -1,7 +1,8 @@
 import axios from "axios";
+import { API_CONFIG } from "../config/api";
 
 const api = axios.create({
-  baseURL: "http://192.168.1.6:8000/api",
+  baseURL: API_CONFIG.BASE_URL,
   timeout: 30000,
   headers: {
     "Content-Type": "multipart/form-data",

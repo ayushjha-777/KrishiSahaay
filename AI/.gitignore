@@ -1,23 +1,19 @@
 # Python
-__pycache__/
+Backend/venv/
+**/__pycache__/
 *.pyc
 
-# Virtual Environment
-venv/
-.venv/
+# Expo / React Native
+Frontend/node_modules/
+Frontend/.expo/
 
-# Dataset
-dataset/
-
-# Test Images
-test.jpg
-
-# TensorBoard
-logs/
-
-# VS Code
+# IDE
 .vscode/
+Frontend/.vscode/
 
-# OS
-.DS_Store
-Thumbs.db
+# Claude
+Frontend/.claude/
+
+# Environment
+.env
+*.env

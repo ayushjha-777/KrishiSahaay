@@ -1,29 +1,70 @@
 import React from "react";
-import { TouchableOpacity, Text, StyleSheet, View } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS } from "../constants/colors";
 
 interface UploadCardProps {
-  onPress: () => void;
+  onCameraPress: () => void;
+  onGalleryPress: () => void;
 }
 
-export default function UploadCard({ onPress }: UploadCardProps) {
+export default function UploadCard({
+  onCameraPress,
+  onGalleryPress,
+}: UploadCardProps) {
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress}>
+    <View style={styles.card}>
       <View style={styles.iconContainer}>
         <MaterialCommunityIcons
-          name="image-plus"
-          size={45}
+          name="leaf"
+          size={48}
           color={COLORS.primary}
         />
       </View>
 
-      <Text style={styles.title}>Upload Leaf Image</Text>
+      <Text style={styles.title}>Upload Potato Leaf</Text>
 
       <Text style={styles.subtitle}>
-        Tap here to select an image from your gallery
+        Capture a new photo or choose one from your gallery to analyze.
       </Text>
-    </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.button, styles.cameraButton]}
+        onPress={onCameraPress}
+      >
+        <MaterialCommunityIcons
+          name="camera"
+          size={22}
+          color="white"
+        />
+
+        <Text style={styles.buttonText}>
+          Take Photo
+        </Text>
+      </TouchableOpacity>
+
+      <Text style={styles.orText}>OR</Text>
+
+      <TouchableOpacity
+        style={[styles.button, styles.galleryButton]}
+        onPress={onGalleryPress}
+      >
+        <MaterialCommunityIcons
+          name="image"
+          size={22}
+          color={COLORS.primary}
+        />
+
+        <Text style={styles.galleryText}>
+          Choose from Gallery
+        </Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
@@ -33,20 +74,15 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 25,
     borderRadius: 20,
-    borderWidth: 2,
-    borderStyle: "dashed",
-    borderColor: "#A5D6A7",
+    padding: 25,
+    elevation: 5,
     alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 35,
-    paddingHorizontal: 20,
-    elevation: 4,
   },
 
   iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 85,
+    height: 85,
+    borderRadius: 45,
     backgroundColor: "#E8F5E9",
     justifyContent: "center",
     alignItems: "center",
@@ -54,7 +90,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "700",
     color: COLORS.primary,
     marginBottom: 8,
@@ -63,7 +99,47 @@ const styles = StyleSheet.create({
   subtitle: {
     textAlign: "center",
     color: COLORS.gray,
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 15,
+    lineHeight: 22,
+    marginBottom: 25,
+  },
+
+  button: {
+    width: "100%",
+    height: 55,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+  },
+
+  cameraButton: {
+    backgroundColor: COLORS.primary,
+  },
+
+  galleryButton: {
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    backgroundColor: "white",
+  },
+
+  buttonText: {
+    color: "white",
+    fontSize: 17,
+    fontWeight: "700",
+    marginLeft: 10,
+  },
+
+  galleryText: {
+    color: COLORS.primary,
+    fontSize: 17,
+    fontWeight: "700",
+    marginLeft: 10,
+  },
+
+  orText: {
+    marginVertical: 15,
+    color: COLORS.gray,
+    fontWeight: "700",
   },
 });

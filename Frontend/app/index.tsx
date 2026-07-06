@@ -17,40 +17,117 @@ import AnalyzeButton from "../components/AnalyzeButton";
 
 import api from "../services/api";
 import { COLORS } from "../constants/colors";
+import * as ImageManipulator from "expo-image-manipulator";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 export default function HomeScreen() {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // -----------------------------
+  // Gallery Picker
+  // -----------------------------
   const pickImage = async () => {
-    try {
-      const permission =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
+  try {
+    const permission =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-      if (!permission.granted) {
-        Alert.alert(
-          "Permission Required",
-          "Please allow gallery access."
-        );
-        return;
-      }
-
-      const result =
-        await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          allowsEditing: true,
-          aspect: [1, 1],
-          quality: 1,
-        });
-
-      if (!result.canceled) {
-        setImageUri(result.assets[0].uri);
-      }
-    } catch (error) {
-      Alert.alert("Error", "Failed to select image.");
+    if (!permission.granted) {
+      Alert.alert(
+        "Permission Required",
+        "Please allow gallery access."
+      );
+      return;
     }
-  };
 
+    const result =
+      await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+
+    if (!result.canceled) {
+
+      const manipulated =
+        await ImageManipulator.manipulateAsync(
+          result.assets[0].uri,
+          [
+            {
+              resize: {
+                width: 512,
+                height: 512,
+              },
+            },
+          ],
+          {
+            compress: 0.8,
+            format: ImageManipulator.SaveFormat.JPEG,
+          }
+        );
+
+      setImageUri(manipulated.uri);
+    }
+
+  } catch {
+    Alert.alert("Error", "Unable to open gallery.");
+  }
+};
+
+  // -----------------------------
+  // Camera
+  // -----------------------------
+  const takePhoto = async () => {
+  try {
+    const permission =
+      await ImagePicker.requestCameraPermissionsAsync();
+
+    if (!permission.granted) {
+      Alert.alert(
+        "Permission Required",
+        "Please allow camera access."
+      );
+      return;
+    }
+
+    const result =
+      await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+
+    if (!result.canceled) {
+
+      const manipulated =
+        await ImageManipulator.manipulateAsync(
+          result.assets[0].uri,
+          [
+            {
+              resize: {
+                width: 512,
+                height: 512,
+              },
+            },
+          ],
+          {
+            compress: 0.8,
+            format: ImageManipulator.SaveFormat.JPEG,
+          }
+        );
+
+      setImageUri(manipulated.uri);
+    }
+
+  } catch {
+    Alert.alert("Error", "Unable to open camera.");
+  }
+};
+
+  // -----------------------------
+  // Analyze
+  // -----------------------------
   const analyzeImage = async () => {
     if (!imageUri) {
       Alert.alert(
@@ -76,24 +153,22 @@ export default function HomeScreen() {
         formData
       );
 
-      const prediction =
-        response.data.prediction;
+      const prediction = response.data.prediction;
 
       router.push({
         pathname: "/result",
         params: {
           image: imageUri,
           disease: prediction.prediction,
-          confidence:
-            prediction.confidence.toFixed(2),
+          confidence: prediction.confidence.toFixed(2),
         },
       });
-    } catch (error: any) {
+    } catch (error) {
       console.log(error);
 
       Alert.alert(
         "Prediction Failed",
-        "Unable to connect to the backend."
+        "Unable to connect to backend."
       );
     } finally {
       setLoading(false);
@@ -109,23 +184,34 @@ export default function HomeScreen() {
         <Header />
 
         <View style={styles.content}>
-
           {!imageUri ? (
-            <UploadCard onPress={pickImage} />
+            <UploadCard
+              onCameraPress={takePhoto}
+              onGalleryPress={pickImage}
+            />
           ) : (
             <>
               <ImagePreview imageUri={imageUri} />
 
               <Text style={styles.changeImage}>
-                Want to use another image?
+                Want to analyze another leaf?
               </Text>
 
-              <Text
-                style={styles.selectAgain}
-                onPress={pickImage}
-              >
-                Select Another Image
-              </Text>
+              <View style={styles.actionButtons}>
+                <Text
+                  style={styles.actionButton}
+                  onPress={takePhoto}
+                >
+                  📷 Camera
+                </Text>
+
+                <Text
+                  style={styles.actionButton}
+                  onPress={pickImage}
+                >
+                  🖼 Gallery
+                </Text>
+              </View>
 
               <AnalyzeButton
                 loading={loading}
@@ -133,9 +219,9 @@ export default function HomeScreen() {
               />
             </>
           )}
-
         </View>
       </ScrollView>
+      <LoadingOverlay visible={loading} />
     </SafeAreaView>
   );
 }
@@ -156,18 +242,29 @@ const styles = StyleSheet.create({
   },
 
   changeImage: {
-    marginTop: 18,
+    marginTop: 20,
     textAlign: "center",
     color: COLORS.gray,
     fontSize: 15,
+    fontWeight: "500",
   },
 
-  selectAgain: {
+  actionButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 15,
+    marginBottom: 15,
+  },
+
+  actionButton: {
+    flex: 1,
     textAlign: "center",
+    marginHorizontal: 6,
+    paddingVertical: 14,
+    backgroundColor: "#E8F5E9",
+    borderRadius: 12,
     color: COLORS.primary,
     fontWeight: "700",
     fontSize: 16,
-    marginTop: 6,
-    marginBottom: 10,
   },
 });

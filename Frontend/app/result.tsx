@@ -84,7 +84,7 @@ export default function ResultScreen() {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.back()}
+        onPress={() => router.replace("/")}
       >
         <Text style={styles.buttonText}>
           Analyze Another Leaf

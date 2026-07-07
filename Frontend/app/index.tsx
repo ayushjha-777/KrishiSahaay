@@ -19,11 +19,20 @@ import api from "../services/api";
 import { COLORS } from "../constants/colors";
 import * as ImageManipulator from "expo-image-manipulator";
 import LoadingOverlay from "../components/LoadingOverlay";
+import { getErrorMessage } from "../utils/errors";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 
 export default function HomeScreen() {
+  useFocusEffect(
+  useCallback(() => {
+    setLoading(false);
+    setImageUri(null);
+    return () => {};
+  }, [])
+);
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
   // -----------------------------
   // Gallery Picker
   // -----------------------------
@@ -163,17 +172,21 @@ export default function HomeScreen() {
           confidence: prediction.confidence.toFixed(2),
         },
       });
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+  console.log(error);
 
-      Alert.alert(
-        "Prediction Failed",
-        "Unable to connect to backend."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+  const message =
+    error?.response?.data?.message ||
+    getErrorMessage(error);
+
+  Alert.alert(
+    "Invalid Image",
+    message
+  );
+} finally {
+  setLoading(false);
+}
+};
 
     return (
     <SafeAreaView style={styles.container}>

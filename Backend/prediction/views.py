@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from prediction.validator import is_leaf_image
 
 from .serializers import PredictSerializer
 from prediction.utils import image_to_numpy
@@ -38,6 +39,16 @@ class PredictAPIView(APIView):
 
         # Convert to numpy array
         image_array = image_to_numpy(image)
+
+        # Validate image first
+        if not is_leaf_image(image_array):
+            return Response(
+            {
+                "success": False,
+                "message": "Please upload a clear potato leaf image."
+            },
+            status=status.HTTP_400_BAD_REQUEST
+            )
 
         # AI prediction
         prediction = predict_disease(image_array)

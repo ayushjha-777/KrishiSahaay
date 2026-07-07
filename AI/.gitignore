@@ -1,19 +1,49 @@
+# ----------------------------
 # Python
+# ----------------------------
 Backend/venv/
+venv/
+.venv/
+
 **/__pycache__/
 *.pyc
 
-# Expo / React Native
+# ----------------------------
+# AI Models & Dataset
+# ----------------------------
+AI/dataset/
+AI/models/
+
+*.keras
+*.h5
+*.pth
+*.pt
+*.onnx
+*.tflite
+
+# ----------------------------
+# React Native / Expo
+# ----------------------------
 Frontend/node_modules/
 Frontend/.expo/
 
+# Build files
+Frontend/android/
+Frontend/ios/
+
+# ----------------------------
 # IDE
+# ----------------------------
 .vscode/
 Frontend/.vscode/
 
+# ----------------------------
 # Claude
+# ----------------------------
 Frontend/.claude/
 
+# ----------------------------
 # Environment
+# ----------------------------
 .env
 *.env

@@ -1,7 +1,6 @@
 import os
 import logging
 import numpy as np
-import tensorflow as tf
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -26,9 +25,12 @@ class ModelLoader:
     @classmethod
     def get_model(cls):
         if cls._model is None:
+            import tensorflow as tf   # <-- Lazy import
+
             logger.info("Loading AI model...")
             cls._model = tf.keras.models.load_model(MODEL_PATH)
             logger.info("Model loaded successfully.")
+
         return cls._model
 
 

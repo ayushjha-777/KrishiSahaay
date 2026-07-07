@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .serializers import PredictSerializer
-from prediction.services import predict_disease
 from prediction.utils import image_to_numpy
 
 
@@ -25,7 +24,7 @@ class PredictAPIView(APIView):
     """
 
     def post(self, request):
-
+        from prediction.services import predict_disease
         serializer = PredictSerializer(data=request.data)
 
         if not serializer.is_valid():

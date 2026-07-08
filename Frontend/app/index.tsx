@@ -174,14 +174,9 @@ export default function HomeScreen() {
       });
     } catch (error: any) {
   console.log(error);
-
-  const message =
-    error?.response?.data?.message ||
-    getErrorMessage(error);
-
   Alert.alert(
-    "Invalid Image",
-    message
+    "Prediction Failed",
+    getErrorMessage(error)
   );
 } finally {
   setLoading(false);

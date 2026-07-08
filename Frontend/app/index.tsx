@@ -178,8 +178,6 @@ export default function HomeScreen() {
     "Prediction Failed",
     getErrorMessage(error)
   );
-} finally {
-  setLoading(false);
 }
 };
 

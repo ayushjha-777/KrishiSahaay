@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .serializers import PredictSerializer
-from prediction.utils import image_to_numpy
+from prediction.utils import image_to_numpy, is_leaf_image
 
 
 class HealthCheckView(APIView):
@@ -35,6 +35,14 @@ class PredictAPIView(APIView):
 
         # Uploaded image
         image = serializer.validated_data["image"]
+
+        # Reject images that don't look like plant leaves before
+        # running them through the disease-prediction model.
+        if not is_leaf_image(image):
+            return Response(
+                {"error": "Please upload a valid potato leaf image."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         # Convert to numpy array
         image_array = image_to_numpy(image)

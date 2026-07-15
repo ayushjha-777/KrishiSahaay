@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-from tensorflow.keras.preprocessing import image
 from PIL import Image
 
 
@@ -50,8 +49,8 @@ def image_to_numpy(uploaded_file):
     # Resize to model input size
     img = img.resize((224, 224))
 
-    # Convert to numpy array
-    img_array = image.img_to_array(img)
+    # Convert to numpy array (float32, same as tf.keras's img_to_array)
+    img_array = np.array(img, dtype=np.float32)
 
     # Add batch dimension
     img_array = np.expand_dims(img_array, axis=0)

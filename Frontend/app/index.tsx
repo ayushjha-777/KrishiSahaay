@@ -163,6 +163,7 @@ export default function HomeScreen() {
       );
 
       const prediction = response.data.prediction;
+      const severity = response.data.severity;
 
       router.push({
         pathname: "/result",
@@ -170,6 +171,8 @@ export default function HomeScreen() {
           image: imageUri,
           disease: prediction.prediction,
           confidence: prediction.confidence.toFixed(2),
+          severityPercent: severity ? String(severity.severity_percent) : "",
+          severityLevel: severity ? severity.severity_level : "",
         },
       });
     } catch (error: any) {

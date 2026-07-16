@@ -13,9 +13,11 @@ import { COLORS } from "../constants/colors";
 import { formatDiseaseName } from "../utils/disease";
 
 export default function ResultScreen() {
-  const { disease, confidence, image } = useLocalSearchParams();
+  const { disease, confidence, image, severityPercent, severityLevel } =
+    useLocalSearchParams();
 
   const diseaseName = formatDiseaseName(String(disease));
+  const hasSeverity = severityLevel && String(severityLevel).length > 0;
 
   const getDiseaseColor = () => {
     if (diseaseName === "Healthy") return COLORS.success;
@@ -27,6 +29,12 @@ export default function ResultScreen() {
     if (diseaseName === "Healthy") return "check-circle";
     if (diseaseName === "Early Blight") return "alert-circle";
     return "close-circle";
+  };
+
+  const getSeverityColor = () => {
+    if (severityLevel === "Mild") return "#FBC02D";
+    if (severityLevel === "Moderate") return "#FB8C00";
+    return COLORS.danger;
   };
 
   return (
@@ -81,6 +89,45 @@ export default function ResultScreen() {
         </Text>
 
       </View>
+
+      {hasSeverity && (
+        <View style={styles.severityCard}>
+
+          <Text style={styles.label}>
+            Severity (Affected Leaf Area)
+          </Text>
+
+          <View style={styles.diseaseRow}>
+            <MaterialCommunityIcons
+              name="chart-donut"
+              size={26}
+              color={getSeverityColor()}
+            />
+
+            <Text
+              style={[
+                styles.severity,
+                { color: getSeverityColor() },
+              ]}
+            >
+              {severityLevel} ({severityPercent}%)
+            </Text>
+          </View>
+
+          <View style={styles.severityBarTrack}>
+            <View
+              style={[
+                styles.severityBarFill,
+                {
+                  width: `${Math.min(Number(severityPercent), 100)}%`,
+                  backgroundColor: getSeverityColor(),
+                },
+              ]}
+            />
+          </View>
+
+        </View>
+      )}
 
       <TouchableOpacity
         style={styles.button}
@@ -139,6 +186,33 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "center",
     elevation: 5,
+  },
+
+  severityCard: {
+    marginTop: 20,
+    backgroundColor: COLORS.white,
+    borderRadius: 20,
+    padding: 20,
+    elevation: 5,
+  },
+
+  severity: {
+    fontSize: 22,
+    fontWeight: "700",
+    marginLeft: 10,
+  },
+
+  severityBarTrack: {
+    marginTop: 14,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#EEEEEE",
+    overflow: "hidden",
+  },
+
+  severityBarFill: {
+    height: "100%",
+    borderRadius: 6,
   },
 
   label: {

@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .serializers import PredictSerializer
-from prediction.utils import image_to_numpy, is_leaf_image
+from prediction.utils import image_to_numpy, is_leaf_image, calculate_severity
 
 
 class HealthCheckView(APIView):
@@ -50,10 +50,17 @@ class PredictAPIView(APIView):
         # AI prediction
         prediction = predict_disease(image_array)
 
+        # Only diseased leaves have a meaningful "severity" -
+        # a healthy leaf has no affected area to measure.
+        severity = None
+        if prediction["prediction"] != "Potato___healthy":
+            severity = calculate_severity(image)
+
         return Response(
             {
                 "success": True,
-                "prediction": prediction
+                "prediction": prediction,
+                "severity": severity,
             },
             status=status.HTTP_200_OK
         )

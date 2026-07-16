@@ -27,9 +27,12 @@ def is_leaf_image(uploaded_file, green_ratio_threshold=0.12):
     hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
 
     # Hue range covering green to yellow-green (typical leaf colors),
-    # including darker/duller shades seen in diseased leaves.
-    lower_green = np.array([15, 25, 20])
-    upper_green = np.array([95, 255, 255])
+    # including duller/browner shades seen in diseased leaves.
+    # Deliberately narrower than a naive "green" range so that random
+    # photos (skin tones, sky, walls, general scenes) don't accidentally
+    # score high enough to pass.
+    lower_green = np.array([30, 40, 30])
+    upper_green = np.array([85, 255, 220])
 
     mask = cv2.inRange(hsv, lower_green, upper_green)
     green_ratio = float(np.count_nonzero(mask)) / mask.size

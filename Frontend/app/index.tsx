@@ -174,10 +174,12 @@ export default function HomeScreen() {
       });
     } catch (error: any) {
   console.log(error);
-  Alert.alert(
-    "Prediction Failed",
-    getErrorMessage(error)
-  );
+  setTimeout(() => {
+    Alert.alert(
+      "Prediction Failed",
+      getErrorMessage(error)
+    );
+  }, 300);
 } finally {
   setLoading(false);
 }

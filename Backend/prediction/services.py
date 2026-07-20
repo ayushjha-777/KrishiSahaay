@@ -6,16 +6,23 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 CLASS_NAMES = [
+    "Bacteria",
+    "Pest",
     "Potato___Early_blight",
     "Potato___Late_blight",
     "Potato___healthy",
 ]
+# IMPORTANT: this order must exactly match the order printed by
+# train.py / evaluate.py as "Classes Found" / "Class order"
+# (tf.keras.utils.image_dataset_from_directory sorts folders
+# alphabetically - Bacteria, Pest, Potato___Early_blight,
+# Potato___Late_blight, Potato___healthy - which is what we trained with).
 
 MODEL_PATH = os.path.join(
     settings.BASE_DIR,
     "prediction",
     "ml_models",
-    "potato_disease_model.tflite"
+    "potato_disease_model_5class.tflite"
 )
 
 
@@ -62,8 +69,7 @@ def predict_disease(image_array):
         "prediction": CLASS_NAMES[predicted_index],
         "confidence": round(confidence, 2),
         "probabilities": {
-            CLASS_NAMES[0]: round(float(prediction[0][0] * 100), 2),
-            CLASS_NAMES[1]: round(float(prediction[0][1] * 100), 2),
-            CLASS_NAMES[2]: round(float(prediction[0][2] * 100), 2),
+            CLASS_NAMES[i]: round(float(prediction[0][i] * 100), 2)
+            for i in range(len(CLASS_NAMES))
         },
     }

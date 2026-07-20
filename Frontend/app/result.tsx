@@ -22,12 +22,16 @@ export default function ResultScreen() {
   const getDiseaseColor = () => {
     if (diseaseName === "Healthy") return COLORS.success;
     if (diseaseName === "Early Blight") return "#FB8C00";
+    if (diseaseName === "Bacteria") return "#8E24AA";
+    if (diseaseName === "Pest") return "#D84315";
     return COLORS.danger;
   };
 
   const getDiseaseIcon = () => {
     if (diseaseName === "Healthy") return "check-circle";
     if (diseaseName === "Early Blight") return "alert-circle";
+    if (diseaseName === "Bacteria") return "bacteria-outline";
+    if (diseaseName === "Pest") return "bug-outline";
     return "close-circle";
   };
 

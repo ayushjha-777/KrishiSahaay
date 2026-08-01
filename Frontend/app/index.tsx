@@ -173,6 +173,25 @@ export default function HomeScreen() {
           confidence: prediction.confidence.toFixed(2),
           severityPercent: severity ? String(severity.severity_percent) : "",
           severityLevel: severity ? severity.severity_level : "",
+          lesionArea: severity?.breakdown
+  ? String(severity.breakdown.lesion_area_percent)
+  : "",
+
+lesionCount: severity?.breakdown
+  ? String(severity.breakdown.lesion_count)
+  : "",
+
+avgLesionSize: severity?.breakdown
+  ? String(severity.breakdown.avg_lesion_size_px)
+  : "",
+
+colorScore: severity?.breakdown
+  ? String(severity.breakdown.color_severity_score)
+  : "",
+
+distributionScore: severity?.breakdown
+  ? String(severity.breakdown.distribution_score)
+  : "",
         },
       });
     } catch (error: any) {

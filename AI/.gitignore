@@ -47,3 +47,5 @@ Frontend/.claude/
 # ----------------------------
 .env
 *.env
+
+dataset

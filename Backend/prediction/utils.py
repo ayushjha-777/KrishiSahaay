@@ -83,37 +83,6 @@ def is_leaf_image(uploaded_file, green_ratio_threshold=0.12):
 # ============================================================
 
 def calculate_severity(uploaded_file):
-    """
-    Multi-Factor Disease Severity Estimation.
-
-    Severity is estimated using:
-
-    1. Lesion Area
-    2. Lesion Count
-    3. Lesion Colour / Darkness
-    4. Spatial Distribution
-
-    Average lesion size is also calculated and returned as a
-    diagnostic feature.
-
-    Final weighted score:
-
-        45% Lesion Area
-        20% Lesion Count
-        15% Colour Severity
-        20% Distribution
-
-    Severity Levels:
-
-        < 10       -> Mild
-        10 - 30    -> Moderate
-        >= 30      -> Severe
-    """
-
-    # --------------------------------------------------------
-    # READ IMAGE
-    # --------------------------------------------------------
-
     uploaded_file.seek(0)
 
     img = Image.open(uploaded_file).convert("RGB")
@@ -490,21 +459,20 @@ def calculate_severity(uploaded_file):
         distribution_score = 0.0
 
 
-    # ========================================================
-    # FINAL MULTI-FACTOR SEVERITY SCORE
-    # ========================================================
+   # ========================================================
+# FINAL MULTI-FACTOR SEVERITY SCORE
+# ========================================================
+
+    normalized_count_score = count_score * 0.30
+    normalized_color_score = color_score * 0.30
+    normalized_distribution_score = distribution_score * 0.30
 
     severity_score = (
-
-        0.45 * area_percent
-
-        + 0.20 * count_score
-
-        + 0.15 * color_score
-
-        + 0.20 * distribution_score
-    )
-
+    0.65 * area_percent
+    + 0.15 * normalized_count_score
+    + 0.10 * normalized_color_score
+    + 0.10 * normalized_distribution_score
+)
 
     # Ensure score stays between 0 and 100
     severity_score = round(

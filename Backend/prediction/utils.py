@@ -459,31 +459,33 @@ def calculate_severity(uploaded_file):
         distribution_score = 0.0
 
 
-   # ========================================================
+  # ========================================================
 # FINAL MULTI-FACTOR SEVERITY SCORE
 # ========================================================
 
-    normalized_count_score = count_score * 0.30
-    normalized_color_score = color_score * 0.30
-    normalized_distribution_score = distribution_score * 0.30
+# Lesion area provides the baseline severity.
+# Other factors adjust the baseline depending on
+# lesion number, darkness and spatial spread.
 
-    severity_score = (
-    0.65 * area_percent
-    + 0.15 * normalized_count_score
-    + 0.10 * normalized_color_score
-    + 0.10 * normalized_distribution_score
+    secondary_score = (
+    0.40 * count_score
+    + 0.25 * color_score
+    + 0.35 * distribution_score
 )
 
-    # Ensure score stays between 0 and 100
+# Convert secondary information into a correction.
+# 50 = neutral
+# >50 increases severity
+# <50 decreases severity
+    correction = (secondary_score - 50) * 0.20
+
+    severity_score = area_percent + correction
+
+# Keep score between 0 and 100
     severity_score = round(
-        min(
-            max(severity_score, 0),
-            100
-        ),
-        2
-    )
-
-
+    min(max(severity_score, 0), 100),
+    2
+)
     # ========================================================
     # SEVERITY CLASSIFICATION
     # ========================================================

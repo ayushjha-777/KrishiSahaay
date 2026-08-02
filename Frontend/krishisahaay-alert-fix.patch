@@ -1,0 +1,21 @@
+diff --git a/Frontend/app/index.tsx b/Frontend/app/index.tsx
+index 42e45b6..50d1deb 100644
+--- a/Frontend/app/index.tsx
++++ b/Frontend/app/index.tsx
+@@ -174,10 +174,12 @@ export default function HomeScreen() {
+       });
+     } catch (error: any) {
+   console.log(error);
+-  Alert.alert(
+-    "Prediction Failed",
+-    getErrorMessage(error)
+-  );
++  setTimeout(() => {
++    Alert.alert(
++      "Prediction Failed",
++      getErrorMessage(error)
++    );
++  }, 300);
+ } finally {
+   setLoading(false);
+ }

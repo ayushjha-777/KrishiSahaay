@@ -1,42 +1,66 @@
 import os
 import logging
 import numpy as np
-import tensorflow as tf
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
 CLASS_NAMES = [
+    "Bacteria",
+    "Pest",
     "Potato___Early_blight",
     "Potato___Late_blight",
     "Potato___healthy",
 ]
+# IMPORTANT: this order must exactly match the order printed by
+# train.py / evaluate.py as "Classes Found" / "Class order"
+# (tf.keras.utils.image_dataset_from_directory sorts folders
+# alphabetically - Bacteria, Pest, Potato___Early_blight,
+# Potato___Late_blight, Potato___healthy - which is what we trained with).
 
 MODEL_PATH = os.path.join(
     settings.BASE_DIR,
     "prediction",
     "ml_models",
-    "potato_disease_model.keras"
+    "potato_disease_model_5class.tflite"
 )
 
 
 class ModelLoader:
-    _model = None
+    _interpreter = None
+    _input_details = None
+    _output_details = None
 
     @classmethod
-    def get_model(cls):
-        if cls._model is None:
-            logger.info("Loading AI model...")
-            cls._model = tf.keras.models.load_model(MODEL_PATH)
+    def get_interpreter(cls):
+        if cls._interpreter is None:
+            # ai-edge-litert is a lightweight TFLite-only runtime.
+            # Unlike full TensorFlow, importing it takes a fraction of a
+            # second and uses a fraction of the memory, which is essential
+            # on resource-constrained hosts like Render's free tier.
+            from ai_edge_litert.interpreter import Interpreter
+
+            logger.info("Loading AI model (TFLite)...")
+            interpreter = Interpreter(model_path=MODEL_PATH)
+            interpreter.allocate_tensors()
+
+            cls._interpreter = interpreter
+            cls._input_details = interpreter.get_input_details()
+            cls._output_details = interpreter.get_output_details()
             logger.info("Model loaded successfully.")
-        return cls._model
+
+        return cls._interpreter, cls._input_details, cls._output_details
 
 
 def predict_disease(image_array):
 
-    model = ModelLoader.get_model()
+    interpreter, input_details, output_details = ModelLoader.get_interpreter()
 
-    prediction = model.predict(image_array, verbose=0)
+    image_array = image_array.astype(np.float32)
+
+    interpreter.set_tensor(input_details[0]["index"], image_array)
+    interpreter.invoke()
+    prediction = interpreter.get_tensor(output_details[0]["index"])
 
     predicted_index = int(np.argmax(prediction))
     confidence = float(np.max(prediction) * 100)
@@ -45,8 +69,7 @@ def predict_disease(image_array):
         "prediction": CLASS_NAMES[predicted_index],
         "confidence": round(confidence, 2),
         "probabilities": {
-            CLASS_NAMES[0]: round(float(prediction[0][0] * 100), 2),
-            CLASS_NAMES[1]: round(float(prediction[0][1] * 100), 2),
-            CLASS_NAMES[2]: round(float(prediction[0][2] * 100), 2),
+            CLASS_NAMES[i]: round(float(prediction[0][i] * 100), 2)
+            for i in range(len(CLASS_NAMES))
         },
     }

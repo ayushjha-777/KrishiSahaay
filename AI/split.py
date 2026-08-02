@@ -28,7 +28,9 @@ for folder in [TRAIN_DIR, VAL_DIR, TEST_DIR]:
 CLASSES = [
     "Potato___Early_blight",
     "Potato___Late_blight",
-    "Potato___healthy"
+    "Potato___healthy",
+    "Pest",
+    "Bacteria",
 ]
 
 for class_name in CLASSES:

@@ -1,0 +1,26 @@
+diff --git a/Frontend/app/index.tsx b/Frontend/app/index.tsx
+index 5d3ee8e..42e45b6 100644
+--- a/Frontend/app/index.tsx
++++ b/Frontend/app/index.tsx
+@@ -178,6 +178,8 @@ export default function HomeScreen() {
+     "Prediction Failed",
+     getErrorMessage(error)
+   );
++} finally {
++  setLoading(false);
+ }
+ };
+ 
+diff --git a/Frontend/services/api.ts b/Frontend/services/api.ts
+index 10a062c..f5a17db 100644
+--- a/Frontend/services/api.ts
++++ b/Frontend/services/api.ts
+@@ -3,7 +3,7 @@ import { API_CONFIG } from "../config/api";
+ 
+ const api = axios.create({
+   baseURL: "https://krishisahaay.onrender.com/api",
+-  timeout: 30000,
++  timeout: 60000,
+   headers: {
+     "Content-Type": "multipart/form-data",
+   },

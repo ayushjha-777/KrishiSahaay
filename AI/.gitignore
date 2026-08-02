@@ -1,23 +1,51 @@
+# ----------------------------
 # Python
-__pycache__/
-*.pyc
-
-# Virtual Environment
+# ----------------------------
+Backend/venv/
 venv/
 .venv/
 
-# Dataset
-dataset/
+**/__pycache__/
+*.pyc
 
-# Test Images
-test.jpg
+# ----------------------------
+# AI Models & Dataset
+# ----------------------------
+AI/dataset/
+AI/models/
 
-# TensorBoard
-logs/
+*.keras
+*.h5
+*.pth
+*.pt
+*.onnx
+*.tflite
 
-# VS Code
+# ----------------------------
+# React Native / Expo
+# ----------------------------
+Frontend/node_modules/
+Frontend/.expo/
+
+# Build files
+Frontend/android/
+Frontend/ios/
+
+# ----------------------------
+# IDE
+# ----------------------------
 .vscode/
+Frontend/.vscode/
 
-# OS
-.DS_Store
-Thumbs.db
+# ----------------------------
+# Claude
+# ----------------------------
+Frontend/.claude/
+
+# ----------------------------
+# Environment
+# ----------------------------
+.env
+*.env
+
+dataset

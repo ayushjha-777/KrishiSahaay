@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -28,6 +30,11 @@ export default function ResultScreen() {
   } = useLocalSearchParams();
 
   const [showAnalysis, setShowAnalysis] = useState(false);
+
+  // AI Recommendation states
+  const [recommendation, setRecommendation] = useState("");
+  const [loadingRecommendation, setLoadingRecommendation] =
+    useState(false);
 
   const diseaseName = formatDiseaseName(String(disease));
 
@@ -60,6 +67,93 @@ export default function ResultScreen() {
     return COLORS.danger;
   };
 
+  // =====================================================
+  // GEMINI AI RECOMMENDATION
+  // =====================================================
+
+  const generateRecommendation = async () => {
+    try {
+      setLoadingRecommendation(true);
+
+      const response = await fetch(
+        "http://127.0.0.1:8000/api/recommend/",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            disease: diseaseName,
+
+            confidence: Number(confidence),
+
+            severity_level: hasSeverity
+              ? String(severityLevel)
+              : "Healthy",
+
+            severity_percent: hasSeverity
+              ? Number(severityPercent)
+              : 0,
+
+            lesion_area: hasSeverity
+              ? Number(lesionArea)
+              : 0,
+
+            lesion_count: hasSeverity
+              ? Number(lesionCount)
+              : 0,
+
+            avg_lesion_size: hasSeverity
+              ? Number(avgLesionSize)
+              : 0,
+
+            color_score: hasSeverity
+              ? Number(colorScore)
+              : 0,
+
+            distribution_score: hasSeverity
+              ? Number(distributionScore)
+              : 0,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error ||
+            "Unable to generate recommendation."
+        );
+      }
+
+      if (!data.recommendation) {
+        throw new Error(
+          "No recommendation was returned."
+        );
+      }
+
+      setRecommendation(data.recommendation);
+
+    } catch (error) {
+      console.error(
+        "Recommendation error:",
+        error
+      );
+
+      Alert.alert(
+        "Recommendation Error",
+        "Unable to generate AI recommendation. Please try again."
+      );
+
+    } finally {
+      setLoadingRecommendation(false);
+    }
+  };
+
+
   return (
     <SafeAreaView style={styles.container}>
 
@@ -69,21 +163,26 @@ export default function ResultScreen() {
       >
 
         {/* TITLE */}
+
         <Text style={styles.title}>
           Analysis Result
         </Text>
 
 
         {/* IMAGE */}
+
         <View style={styles.imageCard}>
+
           <Image
             source={{ uri: String(image) }}
             style={styles.image}
           />
+
         </View>
 
 
         {/* DISEASE RESULT */}
+
         <View style={styles.resultCard}>
 
           <Text style={styles.label}>
@@ -113,6 +212,7 @@ export default function ResultScreen() {
 
 
         {/* CONFIDENCE */}
+
         <View style={styles.confidenceCard}>
 
           <Text style={styles.label}>
@@ -127,6 +227,7 @@ export default function ResultScreen() {
 
 
         {/* SEVERITY */}
+
         {hasSeverity && (
 
           <View style={styles.severityCard}>
@@ -146,7 +247,10 @@ export default function ResultScreen() {
               <Text
                 style={[
                   styles.severity,
-                  { color: getSeverityColor() },
+                  {
+                    color:
+                      getSeverityColor(),
+                  },
                 ]}
               >
                 {severityLevel} ({severityPercent}%)
@@ -156,6 +260,7 @@ export default function ResultScreen() {
 
 
             {/* SEVERITY BAR */}
+
             <View style={styles.severityBarTrack}>
 
               <View
@@ -163,7 +268,10 @@ export default function ResultScreen() {
                   styles.severityBarFill,
                   {
                     width: `${Math.min(
-                      Math.max(Number(severityPercent) || 0, 0),
+                      Math.max(
+                        Number(severityPercent) || 0,
+                        0
+                      ),
                       100
                     )}%`,
 
@@ -177,6 +285,7 @@ export default function ResultScreen() {
 
 
             {/* GET ANALYSIS BUTTON */}
+
             <TouchableOpacity
               style={styles.analysisButton}
               onPress={() =>
@@ -194,9 +303,11 @@ export default function ResultScreen() {
                 />
 
                 <Text style={styles.analysisButtonText}>
+
                   {showAnalysis
                     ? "Hide Severity Analysis"
                     : "Get Severity Analysis"}
+
                 </Text>
 
               </View>
@@ -214,7 +325,8 @@ export default function ResultScreen() {
             </TouchableOpacity>
 
 
-            {/* EXPANDED MULTI-FACTOR ANALYSIS */}
+            {/* EXPANDED ANALYSIS */}
+
             {showAnalysis && (
 
               <View style={styles.analysisContainer}>
@@ -234,7 +346,6 @@ export default function ResultScreen() {
                 </View>
 
 
-                {/* LESION AREA */}
                 <View style={styles.factorRow}>
 
                   <Text style={styles.factorLabel}>
@@ -248,7 +359,6 @@ export default function ResultScreen() {
                 </View>
 
 
-                {/* LESION COUNT */}
                 <View style={styles.factorRow}>
 
                   <Text style={styles.factorLabel}>
@@ -262,7 +372,6 @@ export default function ResultScreen() {
                 </View>
 
 
-                {/* AVG LESION SIZE */}
                 <View style={styles.factorRow}>
 
                   <Text style={styles.factorLabel}>
@@ -276,7 +385,6 @@ export default function ResultScreen() {
                 </View>
 
 
-                {/* COLOR SCORE */}
                 <View style={styles.factorRow}>
 
                   <Text style={styles.factorLabel}>
@@ -290,7 +398,6 @@ export default function ResultScreen() {
                 </View>
 
 
-                {/* DISTRIBUTION SCORE */}
                 <View
                   style={[
                     styles.factorRow,
@@ -309,7 +416,6 @@ export default function ResultScreen() {
                 </View>
 
 
-                {/* INFO */}
                 <View style={styles.infoBox}>
 
                   <MaterialCommunityIcons
@@ -336,7 +442,140 @@ export default function ResultScreen() {
         )}
 
 
+        {/* ============================================= */}
+        {/* AI RECOMMENDATION */}
+        {/* ============================================= */}
+
+        <View style={styles.recommendationCard}>
+
+          <View style={styles.recommendationHeader}>
+
+            <View style={styles.aiIconContainer}>
+
+              <MaterialCommunityIcons
+                name="creation"
+                size={24}
+                color={COLORS.primary}
+              />
+
+            </View>
+
+            <View style={styles.recommendationHeaderText}>
+
+              <Text style={styles.recommendationTitle}>
+                CropCare Insights
+              </Text>
+
+              <Text style={styles.aiPoweredText}>
+                Know what your crop needs next
+              </Text>
+
+            </View>
+
+          </View>
+
+
+          {!recommendation && !loadingRecommendation && (
+
+            <>
+
+              <Text style={styles.recommendationDescription}>
+                Get personalized crop-care guidance based on
+                the detected disease, severity and lesion
+                characteristics.
+              </Text>
+
+              <TouchableOpacity
+                style={styles.generateButton}
+                onPress={generateRecommendation}
+                activeOpacity={0.8}
+              >
+
+                <MaterialCommunityIcons
+                  name="creation"
+                  size={20}
+                  color="white"
+                />
+
+                <Text style={styles.generateButtonText}>
+                  Get Care Plan
+                </Text>
+
+              </TouchableOpacity>
+
+            </>
+
+          )}
+
+
+          {/* LOADING */}
+
+          {loadingRecommendation && (
+
+            <View style={styles.loadingContainer}>
+
+              <ActivityIndicator
+                size="large"
+                color={COLORS.primary}
+              />
+
+              <Text style={styles.loadingText}>
+                Analyzing crop condition...
+              </Text>
+
+              <Text style={styles.loadingSubText}>
+                Generating personalized guidance
+              </Text>
+
+            </View>
+
+          )}
+
+
+          {/* GENERATED RECOMMENDATION */}
+
+          {recommendation &&
+            !loadingRecommendation && (
+
+            <>
+
+              <View style={styles.recommendationResult}>
+
+                <Text style={styles.recommendationText}>
+                  {recommendation}
+                </Text>
+
+              </View>
+
+
+              {/* REGENERATE */}
+
+              <TouchableOpacity
+                style={styles.regenerateButton}
+                onPress={generateRecommendation}
+              >
+
+                <MaterialCommunityIcons
+                  name="refresh"
+                  size={18}
+                  color={COLORS.primary}
+                />
+
+                <Text style={styles.regenerateText}>
+                  Generate New Recommendation
+                </Text>
+
+              </TouchableOpacity>
+
+            </>
+
+          )}
+
+        </View>
+
+
         {/* ANALYZE ANOTHER LEAF */}
+
         <TouchableOpacity
           style={styles.button}
           onPress={() => router.replace("/")}
@@ -457,9 +696,9 @@ const styles = StyleSheet.create({
   },
 
 
-  // ============================
-  // SEVERITY ANALYSIS BUTTON
-  // ============================
+  // ==========================================
+  // SEVERITY ANALYSIS
+  // ==========================================
 
   analysisButton: {
     marginTop: 20,
@@ -483,11 +722,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: COLORS.primary,
   },
-
-
-  // ============================
-  // MULTI-FACTOR ANALYSIS
-  // ============================
 
   analysisContainer: {
     marginTop: 16,
@@ -536,11 +770,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-
-  // ============================
-  // INFORMATION BOX
-  // ============================
-
   infoBox: {
     marginTop: 12,
     paddingTop: 12,
@@ -560,9 +789,125 @@ const styles = StyleSheet.create({
   },
 
 
-  // ============================
+  // ==========================================
+  // AI RECOMMENDATION
+  // ==========================================
+
+  recommendationCard: {
+    marginTop: 20,
+    backgroundColor: COLORS.white,
+    borderRadius: 20,
+    padding: 20,
+    elevation: 5,
+  },
+
+  recommendationHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  aiIconContainer: {
+    width: 45,
+    height: 45,
+    borderRadius: 23,
+    backgroundColor: "#EEF7EE",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  recommendationHeaderText: {
+    marginLeft: 12,
+    flex: 1,
+  },
+
+  recommendationTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: COLORS.primary,
+  },
+
+  aiPoweredText: {
+    marginTop: 2,
+    fontSize: 12,
+    color: COLORS.gray,
+  },
+
+  recommendationDescription: {
+    marginTop: 16,
+    fontSize: 14,
+    lineHeight: 21,
+    color: COLORS.gray,
+  },
+
+  generateButton: {
+    marginTop: 18,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 14,
+    borderRadius: 14,
+
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  generateButtonText: {
+    marginLeft: 8,
+    color: "white",
+    fontWeight: "700",
+    fontSize: 15,
+  },
+
+  loadingContainer: {
+    paddingVertical: 30,
+    alignItems: "center",
+  },
+
+  loadingText: {
+    marginTop: 14,
+    fontSize: 15,
+    fontWeight: "700",
+    color: COLORS.primary,
+  },
+
+  loadingSubText: {
+    marginTop: 4,
+    fontSize: 12,
+    color: COLORS.gray,
+  },
+
+  recommendationResult: {
+    marginTop: 18,
+    backgroundColor: "#F8FAF8",
+    borderRadius: 14,
+    padding: 16,
+  },
+
+  recommendationText: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: "#444444",
+  },
+
+  regenerateButton: {
+    marginTop: 15,
+    paddingVertical: 10,
+
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  regenerateText: {
+    marginLeft: 6,
+    fontSize: 14,
+    fontWeight: "600",
+    color: COLORS.primary,
+  },
+
+
+  // ==========================================
   // MAIN BUTTON
-  // ============================
+  // ==========================================
 
   button: {
     marginTop: 25,
